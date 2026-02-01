@@ -28,17 +28,6 @@ var m2 = "<!-- Meta Pixel Code -->" ;
 var f ;
 
 
-async function getPageContent(url) {
-    // credentials: 'include' заставляет fetch использовать текущие куки браузера
-    const response = await fetch(url, { credentials: 'include' });
-    
-    // Сохраняем HTML-код в символьную переменную
-    const pageHtml = await response.text();
-    
-    console.log(pageHtml); // Вывод в консоль
-    return pageHtml;
-}
-
         document.getElementById('inputfile').addEventListener('change', function () {
                 fff = this.files[0].name;
                 let fr = new FileReader();
@@ -46,14 +35,6 @@ async function getPageContent(url) {
 //                    document.getElementById('output').textContent = fr.result;
 
                 a= fr.result;
-
-
-
-
-// Пример использования:
-//const myPageContent = await getPageContent('https://s10.run/student?1000008935&v2=1#/');
-const myPageContent = getPageContent('https://s10.run/student?1000008935&v2=1#/');
-
 
 
 
