@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>S10.run.adds</title> 
+<link rel="stylesheet" type="text/css" href="webix.css">
+<script type="text/javascript" src="webix.js"></script>
+<style>  body { background: url(s10adds.png); background-repeat: no-repeat; background-size: cover;} </style>
+<style> .tpred { color: #EC3774; background: #fff; border: .4em solid; border-color: rgb(256,256,256); margin: 0 0 0 -.4em;}</style>
+<style> .tpblue { color: #00ccff; background: #fff; border: .4em solid; border-color: rgb(256,256,256); margin: 0 0 0 -.4em;}</style>
+<style> .tpyellow { color: #e9df40; background: #fff; border: .4em solid; border-color: rgb(256,256,256); margin: 0 0 0 -.4em;}</style>
+</head>
+
+<body>
+&emsp;<span style='color:blue'><i><b>S10.run.adds</b></i></span>&emsp;<input type="file" name="inputfile" id="inputfile" accept=".html">&emsp;<span id="ffile"></span>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<span id="student"></span>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<span id="trainer"></span>
+    <pre id="output"></pre>
+
+<script type="text/javascript">
+
+
+var a = "";
+var b ;
+var c ;
+var d ;
+var m1 = "mountPage('studentTasks',";
+var m2 = "<!-- Meta Pixel Code -->" ;
+
+var f ;
+
+
+//async function getPageContent(url) {
+    // credentials: 'include' заставляет fetch использовать текущие куки браузера
+//    const response = await fetch(url, { credentials: 'include' });
+    
+    // Сохраняем HTML-код в символьную переменную
+//    const pageHtml = await response.text();
+    
+//    console.log(pageHtml); // Вывод в консоль
+//    return pageHtml;
+//}
+
+        document.getElementById('inputfile').addEventListener('change', function () {
+                fff = this.files[0].name;
+                let fr = new FileReader();
+                fr.onload = function () {
+//                    document.getElementById('output').textContent = fr.result;
+
+                a= fr.result;
+
+
+
+
+// Пример использования:
+//const myPageContent = await getPageContent('https://s10.run/student?1000008935&v2=1#/');
+//const myPageContent = getPageContent('https://s10.run/student?1000008935&v2=1#/');
+
+
+
+
+				
+ if ( a.includes(m1) && a.includes(m2)	&& !(fff.includes('s10.adds.html'))	) {	  
+				
+                b="["+ a.slice(a.indexOf(m1)+m1.length);
+                c=b.slice(0,b.lastIndexOf(m2)-13)+"]";
+} else {
+
+return alert("файл не содержит тренировки!");
+
+}
+
+
+
+                d=JSON.parse(c);
+
+//document.getElementById('output').textContent = c.slice(0, 300) + "\n=================================================\n" + c.slice(-400);  
+
+document.getElementById('student').textContent = 'student:'  + '        ' + Valid_Student();
+document.getElementById('trainer').textContent = 'trainer:'  + '        ' + Valid_Trainer();
+document.getElementById('ffile').textContent = 'file:'       + '        ' + fff;
+document.getElementById('inputfile').setAttribute("type", "hidden");
+
+function Valid_Student() {
+  try {
+    t=d[0].studentInfo.firstName + " " + d[0].studentInfo.lastName;
+    return t.trim();
+  } catch {
+    return "";
+  }
+}
+
+function Valid_Trainer() {
+  try {
+    t=d[0].trainerInfo.firstName + " " + d[0].trainerInfo.lastName;
+    return t.trim();
+  } catch {
+    return "";
+  }
+}
+
+function Valid_Comment(r,t) {
+  try {
+    return d[0].studentTasksInfo.diaryTasks[r].reportParameters.comment;
+  } catch {
+    return t;
+  }
+}
+
+function Valid_Job(r,t) {
+  try {
+    return d[0].studentTasksInfo.diaryTasks[r].comment;
+  } catch {
+    return t;
+  }
+}
+
+// type treni $.studentTasksInfo.diaryTasks[0].type
+
+function Valid_Ttype(r,t) {
+  try {
+  t="";
+switch (d[0].studentTasksInfo.diaryTasks[r].type) {
+  case 0:
+    t = ""; // отдых
+    break;
+  case 1:
+    t = "Восстановительная";
+    break;
+  case 2:
+    t = "Развивающая";
+    break;
+  case 3:
+    t = "Интервальная";
+    break;
+  case 4:
+    t = "Повторная";
+    break;
+  case 5:
+    t = "Длительная";
+    break;
+  case 6:
+    t = "";
+    break;
+  default:
+    t = ""; // Handles unexpected values
+}
+    return t;
+
+  } catch {
+    return t;
+  }
+}
+
+
+
+n2 = d[0].studentTasksInfo.diaryTasks.length;
+n1 = n2-21;
+
+c2 = "</br>" ;
+
+for(var i = n1; i < n2 ; i++){
+
+c0 = Valid_Comment(i,"")
+
+  c0 = c0.replace(/"/g, "'");
+  c0 = c0.replace(/(\r\n|\n|\r)/gm, ""); 
+  c0 = c0.replace(/<[^>]*>/g, '');
+  c2 = c2 + "<span style='color:blue'>--- " + d[0].studentTasksInfo.diaryTasks[i].date + " [ " + Valid_Ttype(i,"") + " ] " + Valid_Job(i,"") + "</span></br>" + c0 + "</br>\n"
+}
+
+c2 = c2.slice(0,c2.length-2);
+
+//document.getElementById('output').textContent = c2; 
+
+cmnt1= { id: "cmnt1",
+  type:"space",
+//      width:400,
+      height: 820,
+	  scroll:"y",
+      template: c2
+ };
+
+
+e1 = Math.max(d[0].studentTasksInfo.diaryTasks[n1+0].kmCompleted,d[0].studentTasksInfo.diaryTasks[n1+7].kmCompleted,d[0].studentTasksInfo.diaryTasks[n1+14].kmCompleted);
+e2 = Math.max(d[0].studentTasksInfo.diaryTasks[n1+1].kmCompleted,d[0].studentTasksInfo.diaryTasks[n1+8].kmCompleted,d[0].studentTasksInfo.diaryTasks[n1+15].kmCompleted);
+e3 = Math.max(d[0].studentTasksInfo.diaryTasks[n1+2].kmCompleted,d[0].studentTasksInfo.diaryTasks[n1+9].kmCompleted,d[0].studentTasksInfo.diaryTasks[n1+16].kmCompleted);
+e4 = Math.max(d[0].studentTasksInfo.diaryTasks[n1+3].kmCompleted,d[0].studentTasksInfo.diaryTasks[n1+10].kmCompleted,d[0].studentTasksInfo.diaryTasks[n1+17].kmCompleted);
+e5 = Math.max(d[0].studentTasksInfo.diaryTasks[n1+4].kmCompleted,d[0].studentTasksInfo.diaryTasks[n1+11].kmCompleted,d[0].studentTasksInfo.diaryTasks[n1+18].kmCompleted);
+e6 = Math.max(d[0].studentTasksInfo.diaryTasks[n1+5].kmCompleted,d[0].studentTasksInfo.diaryTasks[n1+12].kmCompleted,d[0].studentTasksInfo.diaryTasks[n1+19].kmCompleted);
+e7 = Math.max(d[0].studentTasksInfo.diaryTasks[n1+6].kmCompleted,d[0].studentTasksInfo.diaryTasks[n1+13].kmCompleted,d[0].studentTasksInfo.diaryTasks[n1+20].kmCompleted);
+
+
+function Valid_Pace(r,s,t) {
+  try {
+const tmp = [];
+for(var i=0; i < d[0].studentTasksInfo.diaryTasks[r].tracks.length ; i++){
+ for(var j=0; j < d[0].studentTasksInfo.diaryTasks[r].tracks[i].json.segments.length ; j++){
+ tmp.push(d[0].studentTasksInfo.diaryTasks[r].tracks[i].json.segments[j].pace);
+ }
+}
+
+        return tmp[s];
+
+  } catch {
+    return t;
+  }
+}
+
+//============================
+
+
+function Valid_MaxHeart(r,t) {
+  try {
+var tmp = 0;
+
+for(var i=0; i < d[0].studentTasksInfo.diaryTasks[r].tracks.length ; i++){
+ tmp = Math.max(tmp,d[0].studentTasksInfo.diaryTasks[r].tracks[i].json.max_heartrate);
+ }
+        return tmp;
+  } catch {
+    return t;
+  }
+}
+
+function Valid_AvgHeart(r,t) {
+  try {
+var tmp = 0;
+
+for(var i=0; i < d[0].studentTasksInfo.diaryTasks[r].tracks.length ; i++){
+ tmp = tmp + d[0].studentTasksInfo.diaryTasks[r].tracks[i].json.average_heartrate;
+ }
+        return tmp/d[0].studentTasksInfo.diaryTasks[r].tracks.length;
+  } catch {
+    return t;
+  }
+}
+
+
+//============================
+function Valid_M200(r,t) {
+  try {
+var tmp = 0;
+
+for(var i=0; i < d[0].studentTasksInfo.diaryTasks[r].tracks.length ; i++){
+ tmp = Math.max(tmp,d[0].studentTasksInfo.diaryTasks[r].tracks[i].json.fastest[200].pace);
+ }
+        return tmp;
+  } catch {
+    return t;
+  }
+}
+
+function Valid_M1000(r,t) {
+  try {
+var tmp = 0;
+
+for(var i=0; i < d[0].studentTasksInfo.diaryTasks[r].tracks.length ; i++){
+ tmp = Math.max(tmp,d[0].studentTasksInfo.diaryTasks[r].tracks[i].json.fastest[1000].pace);
+ }
+        return tmp;
+  } catch {
+    return t;
+  }
+}
+
+function Valid_M5000(r,t) {
+  try {
+var tmp = 0;
+
+for(var i=0; i < d[0].studentTasksInfo.diaryTasks[r].tracks.length ; i++){
+ tmp = Math.max(tmp,d[0].studentTasksInfo.diaryTasks[r].tracks[i].json.fastest[5000].pace);
+ }
+        return tmp;
+  } catch {
+    return t;
+  }
+}
+
+//=============================
+
+function Valid_impulse(r,t) {
+  try {
+var tmp = 0;
+
+for(var i=0; i < d[0].studentTasksInfo.diaryTasks[r].tracks.length ; i++){
+ tmp = Math.max(tmp,d[0].studentTasksInfo.diaryTasks[r].tracks[i].impulse);
+ }
+        return tmp;
+  } catch {
+    return t;
+  }
+}
+
+
+function Valid_gs(r,t) {
+  try {
+var tmp = 100;
+
+for(var i=0; i < d[0].studentTasksInfo.diaryTasks[r].tracks.length ; i++){
+ tmp = Math.min(tmp,d[0].studentTasksInfo.diaryTasks[r].tracks[i].gs);
+ }
+        return tmp;
+  } catch {
+    return t;
+  }
+}
+
+
+function Valid_Gain(r,t) {
+  try {
+var tmp = 0;
+
+for(var i=0; i < d[0].studentTasksInfo.diaryTasks[r].tracks.length ; i++){
+ tmp = tmp + d[0].studentTasksInfo.diaryTasks[r].tracks[i].json.total_elevation_gain;
+ }
+        return tmp;
+
+  } catch {
+    return t;
+  }
+}
+
+function Valid_Timed(r,t) {
+  try {
+var tmp = 0;
+
+for(var i=0; i < d[0].studentTasksInfo.diaryTasks[r].tracks.length ; i++){
+ tmp = tmp + d[0].studentTasksInfo.diaryTasks[r].tracks[i].json.moving_time;
+ }
+
+        return tmp/60;
+
+  } catch {
+    return t;
+  }
+}
+
+function ValidMin(timeStr) {
+
+if (timeStr.length > 0) {
+  var ss = parseInt(timeStr.substr(-2), 10);
+} else {
+  var ss = 0;
+}
+if (timeStr.length > 3) {
+  var mm = parseInt(timeStr.substr(-5,2), 10); 
+} else {
+  var mm = 0;
+}
+if (timeStr.length > 6) {
+  var hh = parseInt(timeStr.substr(-8,2), 10);
+} else {
+  var hh = 0;
+}
+
+ 
+ return ((hh*60*60)+(mm*60)+ss)/60;
+}
+
+
+function Valid_Timea(r,t) {
+  try {
+var tmp = 0;
+
+for(var i=0; i < d[0].studentTasksInfo.diaryTasks[r].tracks.length ; i++){
+ tmp = tmp + ValidMin(d[0].studentTasksInfo.diaryTasks[r].tracks[i].absolute);
+ }
+
+        return tmp;
+
+  } catch {
+    return t;
+  }
+}
+
+
+function To_Pace(m) {
+var mm = Math.floor(Math.abs(m));
+var tt = Math.floor(((Math.abs(m)-mm)*6000)/100);
+if (tt >9) {
+var ss = String(tt);
+} else {
+var ss = "0" + String(tt);
+}
+return mm + ":" + ss;
+}
+
+
+
+t1 = "" ;
+
+for(var i = n2-1; i > n1-1 ; i--){
+  t1 = t1 + '{ "timed":"' + Valid_Timea(i,"") + '", "id":"' + i + '", "dayd":"' + d[0].studentTasksInfo.diaryTasks[i].date.slice(-2) + '"},\n'
+ }
+
+t1 = "[\n" + t1.slice(0,t1.length-2) + "\n]" ;
+
+
+gg = JSON.parse(t1);
+
+gra0 = {  width:720,  height:131,  type:"clean",
+cols:[
+        {
+          view:"chart",
+          type:"line",
+          value:"#timed#",  padding:{left:25,bottom: 17  },
+          preset:"plot",
+		  label: function(obj){
+			return "<span style='color:blue'><font size=1>" + parseInt(obj.timed,10) + "</font></span>";
+			},
+          xAxis:{
+            template:"'#dayd#"
+          },
+          yAxis:{
+          },
+  legend:{layout:"x", height:-10, align:"center", valign:"middle",
+    values:[
+      {text:"daily moving_time", toggle:true,markerType: "item"}
+    ]
+  }	,	  
+  series:[
+    {  type:"line",  value:"#timed#", item:{radius:2,borderColor: "#EC3774"}, line:{color:"#EC3774",width:2} }
+  ],		  
+          data: gg
+        }
+
+]
+};
+
+
+
+
+t1 = "" ;
+
+for(var i = n2-1; i > n1-1 ; i--){
+  t1 = t1 + '{ "kmCompleted":"' + d[0].studentTasksInfo.diaryTasks[i].kmCompleted + '", "id":"' + i + '", "dayd":"' + d[0].studentTasksInfo.diaryTasks[i].date.slice(-2) + '"},\n'
+ }
+
+t1 = "[\n" + t1.slice(0,t1.length-2) + "\n]" ;
+
+gg = JSON.parse(t1);
+
+gra1 = {  width:720,  height:131,  type:"clean",
+cols:[
+        {
+          view:"chart",
+          type:"line",
+          value:"#kmCompleted#",  padding:{left:25,bottom: 17  },
+          preset:"plot",
+		  label: function(obj){
+			return "<span style='color:blue'><font size=1>" + parseInt(obj.kmCompleted,10) + "</font></span>";
+			} ,
+		xAxis:{
+            template:"'#dayd#"
+          },
+          yAxis:{
+          },
+  legend:{layout:"x", height:-10, align:"center", valign:"middle",
+    values:[
+      {text:"daily kmCompleted", toggle:true,markerType: "item"}
+    ]
+  }	,	  
+  series:[
+    {  type:"line",  value:"#kmCompleted#", item:{radius:2,borderColor: "#EC3774"}, line:{color:"#EC3774",width:2} }
+  ],		  
+          data: gg
+        }
+
+]
+};
+
+// -----------------------------------------
+
+t1 = "" ;
+
+for(var i = n2-1; i > n1-1 ; i--){
+  t1 = t1 + '{ "pace200":"-' + Valid_M200(i,"") + '", "pace1000":"-' + Valid_M1000(i,"") + '", "pace5000":"-' + Valid_M5000(i,"") + '", "id":"' + i + '", "dayd":"' + d[0].studentTasksInfo.diaryTasks[i].date.slice(-2) + '"},\n' 
+ }
+
+t1 = "[\n" + t1.slice(0,t1.length-2) + "\n]" ;
+
+gg = JSON.parse(t1);
+
+gra2 = {  width:720,  height:131,  type:"clean", //padding:{left:14,bottom: 17  }, radius:0,
+cols:[
+        {
+          view:"chart",
+          type:"line",
+          padding:{left:25,bottom: 17  },
+          preset:"plot",
+          xAxis:{
+            template:"'#dayd#"
+          },
+          yAxis:{start:-7, step:1, end:-3,template: function(obj) {return Math.abs(obj);}},
+  legend:{layout:"x", height:-10, align:"center", valign:"middle",
+    values:[
+      {text:"pace5000", toggle:true,markerType: "item"},
+      {text:"pace1000", toggle:true,markerType: "item"},
+      {text:"pace200", toggle:true,markerType: "item"}
+    ]
+  }	,	  
+  scheme:{ $group: { by:"dayd",  map:{
+        pace5000:["pace5000","any"],
+        pace1000:["pace1000","any"],
+        pace200:["pace200","any"]
+      }
+    }
+  },  series:[
+    {  type:"line",  value:"#pace5000#", tooltip:{css:"tpyellow",template:function(obj) {return To_Pace(obj.pace5000);}}, item:{radius:3,borderColor: "#e9df40"}, line:{color:"#e9df40",width:2} },
+    {  type:"line",  value:"#pace1000#", tooltip:{css:"tpblue",template:function(obj) {return To_Pace(obj.pace1000);}}, item:{radius:3,borderColor: "#00ccff"}, line:{color:"#00ccff",width:2} },
+    {  type:"line",  value:"#pace200#", tooltip:{css:"tpred", template:function(obj) {return To_Pace(obj.pace200);}}, item:{radius:3,borderColor: "#EC3774"}, line:{color:"#EC3774",width:2} }
+  ],		  
+          data: gg
+        }
+
+]
+};
+
+// -----------------------------------------
+
+t1 = "" ;
+
+for(var i = n2-1; i > n1-1 ; i--){
+  t1 = t1 + '{ "max_heartrate":"' + Valid_MaxHeart(i,"") + '", "avg_heartrate":"' + Valid_AvgHeart(i,"") + '", "id":"' + i + '", "dayd":"' + d[0].studentTasksInfo.diaryTasks[i].date.slice(-2) + '"},\n' 
+ }
+
+t1 = "[\n" + t1.slice(0,t1.length-2) + "\n]" ;
+
+//document.getElementById('output').textContent = t1;  
+
+gg = JSON.parse(t1);
+
+gra3 = {  width:720,  height:131,  type:"clean", 
+cols:[
+        {
+          view:"chart",
+          type:"line",
+          padding:{left:25,bottom: 17  },
+          preset:"plot",
+          xAxis:{
+            template:"'#dayd#"
+          },
+          yAxis:{},
+  legend:{layout:"x", height:-10, align:"center", valign:"middle",
+    values:[
+      {text:"avg_heartrate", toggle:true,markerType: "item"},
+      {text:"max_heartrate", toggle:true,markerType: "item"}
+    ]
+  }	,	  
+  scheme:{ $group: { by:"dayd",  map:{
+        avg_heartrate:["avg_heartrate","any"],
+        max_heartrate:["max_heartrate","any"]
+      }
+    }
+  },  series:[
+    {  type:"line",  value:"#avg_heartrate#", tooltip:{css:"tpblue",template:function(obj) {return Math.floor(obj.avg_heartrate);}}, item:{radius:3,borderColor: "#00ccff"}, line:{color:"#00ccff",width:2} },
+    {  type:"line",  value:"#max_heartrate#", tooltip:{css:"tpred", template:function(obj) {return obj.max_heartrate;}}, item:{radius:3,borderColor: "#EC3774"}, line:{color:"#EC3774",width:2} }
+  ],		  
+          data: gg
+        }
+
+]
+};
+
+// -----------------------------------------
+
+t1 = "" ;
+
+for(var i = n2-1; i > n1-1 ; i--){
+  t1 = t1 + '{ "gain":"' + Valid_Gain(i,"") + '", "id":"' + i + '", "dayd":"' + d[0].studentTasksInfo.diaryTasks[i].date.slice(-2) + '"},\n'
+ }
+
+t1 = "[\n" + t1.slice(0,t1.length-2) + "\n]" ;
+
+gg = JSON.parse(t1);
+
+gra4 = {  width:720,  height:131,  type:"clean",
+cols:[
+        {
+          view:"chart",
+          type:"line",
+          value:"#gain#",  padding:{left:25,bottom: 17  },
+          preset:"plot",
+		  label: function(obj){
+			return "<span style='color:blue'><font size=1>" + parseInt(obj.gain,10) + "</font></span>";
+			},
+			xAxis:{
+            template:"'#dayd#"
+          },
+          yAxis:{
+          },
+  legend:{layout:"x", height:-10, align:"center", valign:"middle",
+    values:[
+      {text:"daily total_elevation_gain", toggle:true,markerType: "item"}
+    ]
+  }	,	  
+  series:[
+    {  type:"line",  value:"#gain#", item:{radius:2,borderColor: "#EC3774"}, line:{color:"#EC3774",width:2} }
+  ],		  
+          data: gg
+        }
+
+]
+};
+
+// -----------------------------------------
+
+t1 = "" ;
+
+for(var i = n2-1; i > n1-1 ; i--){
+  t1 = t1 + '{ "gs":"' + Valid_gs(i,"") + '", "id":"' + i + '", "dayd":"' + d[0].studentTasksInfo.diaryTasks[i].date.slice(-2) + '"},\n'
+ }
+
+t1 = "[\n" + t1.slice(0,t1.length-2) + "\n]" ;
+
+gg = JSON.parse(t1);
+
+gra6 = {  width:720,  height:131,  type:"clean",
+cols:[
+        {
+          view:"chart",
+          type:"line",
+          value:"#gs#",  padding:{left:25,bottom: 17  },
+          preset:"plot",
+		  label: function(obj){
+			return "<span style='color:blue'><font size=1>" + parseInt(obj.gs,10) + "</font></span>";
+			},
+			xAxis:{
+            template:"'#dayd#"
+          },
+          yAxis:{
+          },
+  legend:{layout:"x", height:-10, align:"center", valign:"middle",
+    values:[
+      {text:"daily gs", toggle:true,markerType: "item"}
+    ]
+  }	,	  
+  series:[
+    {  type:"line",  value:"#gs#", item:{radius:2,borderColor: "#EC3774"}, line:{color:"#EC3774",width:2} }
+  ],		  
+          data: gg
+        }
+
+]
+};
+
+// -----------------------------------------
+
+webix.ui(
+{ "id":"ini",
+"rows":[ { view:"resizer" },
+{ "id":"main" ,
+  "cols": [
+       { "id":"form1%" ,
+        "rows":[
+				 gra1 , { view:"resizer" },
+                 gra0 , { view:"resizer" },
+				 gra4 , { view:"resizer" },
+				 gra2 , { view:"resizer" },
+				 gra3 , { view:"resizer" },
+				 gra6
+			   ]
+		},  
+		{ view:"resizer" },
+       { "id":"form2%" , 
+        "rows":[
+                 cmnt1 
+			   ]
+		}  
+        ]},
+{ view:"resizer" }
+]}
+).show();  
+
+                }
+
+                fr.readAsText(this.files[0]);
+            })
+
+
+
+
+
+</script>
+<script>window.addEventListener('mousemove', function(event){document.querySelector('body > div.webix_message_area > div > div').click()},{ once: true});</script>
+</body>
+
+</html>
