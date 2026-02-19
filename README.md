@@ -1,2 +1,2 @@
-# s10.run.adds
+# s10.run_adds
 SPA приложение для платформы s10.run
