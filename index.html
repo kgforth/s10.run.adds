@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>S10.run.adds</title> 
+    <title>S10.run_adds</title> 
 <link rel="stylesheet" type="text/css" href="webix.css">
 <script type="text/javascript" src="webix.js"></script>
 <style>  body { background: url(s10adds.png); background-repeat: no-repeat; background-size: cover;} </style>
@@ -12,8 +12,6 @@
 </head>
 
 <body>
-&emsp;<span style='color:blue'><i><b>S10.run.adds</b></i></span>&emsp;<input type="file" name="inputfile" id="inputfile" accept=".html">&emsp;<span id="ffile"></span>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<span id="student"></span>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<span id="trainer"></span>
-    <pre id="output"></pre>
 
 <script type="text/javascript">
 
@@ -24,28 +22,50 @@ var c ;
 var d ;
 var m1 = "mountPage('studentTasks',";
 var m2 = "<!-- Meta Pixel Code -->" ;
+var m3 = '"trainingsRequests":';
 
 var f ;
 
 
-        document.getElementById('inputfile').addEventListener('change', function () {
-                fff = this.files[0].name;
-                let fr = new FileReader();
-                fr.onload = function () {
-//                    document.getElementById('output').textContent = fr.result;
+// 1. Сразу сообщаем родителю, что мы загрузились
+if (window.opener) {
+    window.opener.postMessage("PARSER_READY", "*");
+} else {
+    alert("Запустите букмарклет на фоне раздела задач S10.run");
+}
 
-                a= fr.result;
+//        document.getElementById('inputfile').addEventListener('change', function () {
+//                fff = this.files[0].name;
+//                let fr = new FileReader();
+//                fr.onload = function () {    a= fr.result;
 
+window.addEventListener("message", (event) => {
+    // Проверка, что пришло именно наше сообщение
+    if (event.data && event.data.type === "DATA_PAYLOAD") {
+        const receivedText = event.data.text;
+//        console.log("Успех! Получено символов:", receivedText.length);
+		a=receivedText;
+
+
+// Пример использования:
+//const myPageContent = await getPageContent('https://s10.run/student?1000008935&v2=1#/');
+//const myPageContent = getPageContent('https://s10.run/student?1000008935&v2=1#/');
+
+//alert(a);
 
 
 				
- if ( a.includes(m1) && a.includes(m2)	&& !(fff.includes('s10.adds.html'))	) {	  
+ if ( a.includes(m1) && a.includes(m2)	) {	  
 				
                 b="["+ a.slice(a.indexOf(m1)+m1.length);
-                c=b.slice(0,b.lastIndexOf(m2)-13)+"]";
+//                c=b.slice(0,b.lastIndexOf(m2)-13)+"]";
+                c=b.slice(0,b.lastIndexOf(m3))+'"trainingsRequests": []}]';
+
+//alert(c.slice(-40));
+	 
 } else {
 
-return alert("���� �� �������� ����������!");
+return alert("Запустите букмарклет на фоне раздела задач S10.run");
 
 }
 
@@ -55,10 +75,16 @@ return alert("���� �� �������� ����������!");
 
 //document.getElementById('output').textContent = c.slice(0, 300) + "\n=================================================\n" + c.slice(-400);  
 
-document.getElementById('student').textContent = 'student:'  + '        ' + Valid_Student();
-document.getElementById('trainer').textContent = 'trainer:'  + '        ' + Valid_Trainer();
-document.getElementById('ffile').textContent = 'file:'       + '        ' + fff;
-document.getElementById('inputfile').setAttribute("type", "hidden");
+//document.getElementById('student').textContent = 'student:'  + '        ' + Valid_Student();
+//document.getElementById('trainer').textContent = 'trainer:'  + '        ' + Valid_Trainer();
+//document.getElementById('ffile').textContent = 'file:'       + '        ' + fff;
+//document.getElementById('inputfile').setAttribute("type", "hidden");
+
+function formatDate(date) {
+    // Разделяет "2023-03-15" на ["2023", "03", "15"]
+    const parts = date.split('-');
+    return `${parts[2]}.${parts[1]}.${parts[0]}`;
+}
 
 function Valid_Student() {
   try {
@@ -86,6 +112,53 @@ function Valid_Comment(r,t) {
   }
 }
 
+function Valid_Job(r,t) {
+  try {
+    return d[0].studentTasksInfo.diaryTasks[r].comment;
+  } catch {
+    return t;
+  }
+}
+
+// type treni $.studentTasksInfo.diaryTasks[0].type
+
+function Valid_Ttype(r,t) {
+  try {
+  t="";
+switch (d[0].studentTasksInfo.diaryTasks[r].type) {
+  case 0:
+    t = ""; // отдых
+    break;
+  case 1:
+    t = "Восстановительная";
+    break;
+  case 2:
+    t = "Развивающая";
+    break;
+  case 3:
+    t = "Интервальная";
+    break;
+  case 4:
+    t = "Повторная";
+    break;
+  case 5:
+    t = "Длительная";
+    break;
+  case 6:
+    t = "";
+    break;
+  case 7:
+    t = "Силовая";
+    break;		
+  default:
+    t = ""; // Handles unexpected values
+}
+    return t;
+
+  } catch {
+    return t;
+  }
+}
 
 
 n2 = d[0].studentTasksInfo.diaryTasks.length;
@@ -100,7 +173,7 @@ c0 = Valid_Comment(i,"")
   c0 = c0.replace(/"/g, "'");
   c0 = c0.replace(/(\r\n|\n|\r)/gm, ""); 
   c0 = c0.replace(/<[^>]*>/g, '');
-  c2 = c2 + "<span style='color:blue'>--- " + d[0].studentTasksInfo.diaryTasks[i].date + " ---</span></br>" + c0 + "</br>\n"
+  c2 = c2 + "<span style='color:blue'>--- " + d[0].studentTasksInfo.diaryTasks[i].date + " [ " + Valid_Ttype(i,"") + " ] " + Valid_Job(i,"") + "</span></br>" + c0 + "</br>\n"
 }
 
 c2 = c2.slice(0,c2.length-2);
@@ -138,35 +211,108 @@ for(var i=0; i < d[0].studentTasksInfo.diaryTasks[r].tracks.length ; i++){
         return tmp[s];
 
   } catch {
-    return t;
+  
+      try {
+			const tmp = [];
+			for(var i=0; i < d[0].studentTasksInfo.diaryTasks[r].tracks.length ; i++){
+			for(var j=0; j < d[0].studentTasksInfo.diaryTasks[r].tracks[i].json.laps.length ; j++){
+			tmp.push(d[0].studentTasksInfo.diaryTasks[r].tracks[i].json.laps[j].average_speed);
+				}
+			}	  
+            
+            num=(1000/tmp[s])/60;			
+			
+//			return num.toFixed(2);
+            return (Math.round(num * 100) / 100) + 0.01; 
+			
+           } catch {
+
+	       	return t;
+	
+	      }
+    
+	return t;
   }
 }
-
 //============================
 
 
 function Valid_MaxHeart(r,t) {
   try {
 var tmp = 0;
-
+var tt = 0;
 for(var i=0; i < d[0].studentTasksInfo.diaryTasks[r].tracks.length ; i++){
- tmp = Math.max(tmp,d[0].studentTasksInfo.diaryTasks[r].tracks[i].json.max_heartrate);
+ tt = d[0].studentTasksInfo.diaryTasks[r].tracks[i].json.max_heartrate;
+if ( tt === undefined) {
+    throw new Error("Переменная tt не определена (undefined)!");
+}
+ tmp = Math.max(tmp,tt);
  }
-        return tmp;
-  } catch {
+if ( tmp === 0 ) {
+return t; 
+} else {
+  return tmp;
+ }
+
+ } catch {
+      try {
+			tmp = 0;
+			tt = 0;
+			for(var i=0; i < d[0].studentTasksInfo.diaryTasks[r].tracks.length ; i++){
+			for(var j=0; j < d[0].studentTasksInfo.diaryTasks[r].tracks[i].json.laps.length ; j++){
+             tt = d[0].studentTasksInfo.diaryTasks[r].tracks[i].json.laps[j].hr ;
+
+if ( tt === undefined) {
+    throw new Error("Переменная tt2 не определена (undefined)!");
+}
+			tmp = Math.max(tmp,tt);
+				}
+			}	  
+if ( tmp === 0 ) {
+return t; 
+} else {
+  return tmp;
+ }
+           } catch {
+	       	return t;
+	      }
     return t;
   }
 }
 
+
 function Valid_AvgHeart(r,t) {
   try {
 var tmp = 0;
-
+var tt = 0;
 for(var i=0; i < d[0].studentTasksInfo.diaryTasks[r].tracks.length ; i++){
- tmp = tmp + d[0].studentTasksInfo.diaryTasks[r].tracks[i].json.average_heartrate;
+ tt = d[0].studentTasksInfo.diaryTasks[r].tracks[i].json.average_heartrate;
+if ( tt === undefined) {
+    throw new Error("Переменная tt не определена (undefined)!");
+}
+ tmp = tmp+tt;
  }
         return tmp/d[0].studentTasksInfo.diaryTasks[r].tracks.length;
-  } catch {
+ } catch {
+      try {
+			tmp = 0;
+			tt = 0;
+			ttt = 0;
+			for(var i=0; i < d[0].studentTasksInfo.diaryTasks[r].tracks.length ; i++){
+			for(var j=0; j < d[0].studentTasksInfo.diaryTasks[r].tracks[i].json.laps.length ; j++){
+             tt = d[0].studentTasksInfo.diaryTasks[r].tracks[i].json.laps[j].hr ;
+
+if ( tt === undefined) {
+    throw new Error("Переменная tt2 не определена (undefined)!");
+}
+			tmp = tmp+tt;
+			ttt = ttt+1;
+				}
+			}	  
+            return tmp/ttt;
+           } catch {
+	       	return t;
+	      }
     return t;
   }
 }
@@ -301,7 +447,7 @@ var tmp = 0;
 for(var i=0; i < d[0].studentTasksInfo.diaryTasks[r].tracks.length ; i++){
  tmp = tmp + ValidMin(d[0].studentTasksInfo.diaryTasks[r].tracks[i].absolute);
  }
-
+	if ( Number.isNaN(tmp) ) {  tmp = 0 ; }
         return tmp;
 
   } catch {
@@ -326,11 +472,12 @@ return mm + ":" + ss;
 t1 = "" ;
 
 for(var i = n2-1; i > n1-1 ; i--){
-  t1 = t1 + '{ "timed":"' + Valid_Timea(i,"") + '", "id":"' + i + '", "dayd":"' + d[0].studentTasksInfo.diaryTasks[i].date.slice(-2) + '"},\n'
+  t1 = t1 + '{ "timed":"' + Valid_Timea(i,0) + '", "id":"' + i + '", "dayd":"' + d[0].studentTasksInfo.diaryTasks[i].date.slice(-2) + '"},\n'
  }
 
 t1 = "[\n" + t1.slice(0,t1.length-2) + "\n]" ;
 
+//console.log(t1);
 
 gg = JSON.parse(t1);
 
@@ -355,7 +502,7 @@ cols:[
     ]
   }	,	  
   series:[
-    {  type:"line",  value:"#timed#", item:{radius:2,borderColor: "#EC3774"}, line:{color:"#EC3774",width:2} }
+    {  type:"spline",  value:"#timed#", item:{radius:2,borderColor: "#EC3774"}, line:{color:"#EC3774",width:2} }
   ],		  
           data: gg
         }
@@ -397,7 +544,7 @@ cols:[
     ]
   }	,	  
   series:[
-    {  type:"line",  value:"#kmCompleted#", item:{radius:2,borderColor: "#EC3774"}, line:{color:"#EC3774",width:2} }
+    {  type:"spline",  value:"#kmCompleted#", item:{radius:2,borderColor: "#EC3774"}, line:{color:"#EC3774",width:2} }
   ],		  
           data: gg
         }
@@ -442,9 +589,9 @@ cols:[
       }
     }
   },  series:[
-    {  type:"line",  value:"#pace5000#", tooltip:{css:"tpyellow",template:function(obj) {return To_Pace(obj.pace5000);}}, item:{radius:3,borderColor: "#e9df40"}, line:{color:"#e9df40",width:2} },
-    {  type:"line",  value:"#pace1000#", tooltip:{css:"tpblue",template:function(obj) {return To_Pace(obj.pace1000);}}, item:{radius:3,borderColor: "#00ccff"}, line:{color:"#00ccff",width:2} },
-    {  type:"line",  value:"#pace200#", tooltip:{css:"tpred", template:function(obj) {return To_Pace(obj.pace200);}}, item:{radius:3,borderColor: "#EC3774"}, line:{color:"#EC3774",width:2} }
+    {  type:"spline",  value:"#pace5000#", tooltip:{css:"tpyellow",template:function(obj) {return To_Pace(obj.pace5000);}}, item:{radius:3,borderColor: "#e9df40"}, line:{color:"#e9df40",width:2} },
+    {  type:"spline",  value:"#pace1000#", tooltip:{css:"tpblue",template:function(obj) {return To_Pace(obj.pace1000);}}, item:{radius:3,borderColor: "#00ccff"}, line:{color:"#00ccff",width:2} },
+    {  type:"spline",  value:"#pace200#", tooltip:{css:"tpred", template:function(obj) {return To_Pace(obj.pace200);}}, item:{radius:3,borderColor: "#EC3774"}, line:{color:"#EC3774",width:2} }
   ],		  
           data: gg
         }
@@ -489,8 +636,8 @@ cols:[
       }
     }
   },  series:[
-    {  type:"line",  value:"#avg_heartrate#", tooltip:{css:"tpblue",template:function(obj) {return Math.floor(obj.avg_heartrate);}}, item:{radius:3,borderColor: "#00ccff"}, line:{color:"#00ccff",width:2} },
-    {  type:"line",  value:"#max_heartrate#", tooltip:{css:"tpred", template:function(obj) {return obj.max_heartrate;}}, item:{radius:3,borderColor: "#EC3774"}, line:{color:"#EC3774",width:2} }
+    {  type:"spline",  value:"#avg_heartrate#", tooltip:{css:"tpblue",template:function(obj) {return Math.floor(obj.avg_heartrate);}}, item:{radius:3,borderColor: "#00ccff"}, line:{color:"#00ccff",width:2} },
+    {  type:"spline",  value:"#max_heartrate#", tooltip:{css:"tpred", template:function(obj) {return obj.max_heartrate;}}, item:{radius:3,borderColor: "#EC3774"}, line:{color:"#EC3774",width:2} }
   ],		  
           data: gg
         }
@@ -503,7 +650,7 @@ cols:[
 t1 = "" ;
 
 for(var i = n2-1; i > n1-1 ; i--){
-  t1 = t1 + '{ "gain":"' + Valid_Gain(i,"") + '", "id":"' + i + '", "dayd":"' + d[0].studentTasksInfo.diaryTasks[i].date.slice(-2) + '"},\n'
+  t1 = t1 + '{ "gain":"' + Valid_Gain(i,null) + '", "id":"' + i + '", "dayd":"' + d[0].studentTasksInfo.diaryTasks[i].date.slice(-2) + '"},\n'
  }
 
 t1 = "[\n" + t1.slice(0,t1.length-2) + "\n]" ;
@@ -531,7 +678,7 @@ cols:[
     ]
   }	,	  
   series:[
-    {  type:"line",  value:"#gain#", item:{radius:2,borderColor: "#EC3774"}, line:{color:"#EC3774",width:2} }
+    {  type:"spline",  value:"#gain#", item:{radius:2,borderColor: "#EC3774"}, line:{color:"#EC3774",width:2} }
   ],		  
           data: gg
         }
@@ -544,7 +691,7 @@ cols:[
 t1 = "" ;
 
 for(var i = n2-1; i > n1-1 ; i--){
-  t1 = t1 + '{ "impulse":"' + Valid_impulse(i,"") + '", "id":"' + i + '", "dayd":"' + d[0].studentTasksInfo.diaryTasks[i].date.slice(-2) + '"},\n'
+  t1 = t1 + '{ "impulse":"' + Valid_impulse(i,0) + '", "id":"' + i + '", "dayd":"' + d[0].studentTasksInfo.diaryTasks[i].date.slice(-2) + '"},\n'
  }
 
 t1 = "[\n" + t1.slice(0,t1.length-2) + "\n]" ;
@@ -572,7 +719,7 @@ cols:[
     ]
   }	,	  
   series:[
-    {  type:"line",  value:"#impulse#", item:{radius:2,borderColor: "#EC3774"}, line:{color:"#EC3774",width:2} }
+    {  type:"spline",  value:"#impulse#", item:{radius:2,borderColor: "#EC3774"}, line:{color:"#EC3774",width:2} }
   ],		  
           data: gg
         }
@@ -585,7 +732,7 @@ cols:[
 t1 = "" ;
 
 for(var i = n2-1; i > n1-1 ; i--){
-  t1 = t1 + '{ "gs":"' + Valid_gs(i,"") + '", "id":"' + i + '", "dayd":"' + d[0].studentTasksInfo.diaryTasks[i].date.slice(-2) + '"},\n'
+  t1 = t1 + '{ "gs":"' + Valid_gs(i,0) + '", "id":"' + i + '", "dayd":"' + d[0].studentTasksInfo.diaryTasks[i].date.slice(-2) + '"},\n'
  }
 
 t1 = "[\n" + t1.slice(0,t1.length-2) + "\n]" ;
@@ -613,7 +760,7 @@ cols:[
     ]
   }	,	  
   series:[
-    {  type:"line",  value:"#gs#", item:{radius:2,borderColor: "#EC3774"}, line:{color:"#EC3774",width:2} }
+    {  type:"spline",  value:"#gs#", item:{radius:2,borderColor: "#EC3774"}, line:{color:"#EC3774",width:2} }
   ],		  
           data: gg
         }
@@ -659,9 +806,9 @@ cols:[
       }
     }
   },  series:[
-    {  type:"line",  value:"#pace14#", tooltip:{css:"tpyellow",template:function(obj) {return To_Pace(obj.pace14);}}, item:{radius:3,borderColor: "#e9df40"}, line:{color:"#e9df40",width:2} },
-    {  type:"line",  value:"#pace7#", tooltip:{css:"tpblue",template:function(obj) {return To_Pace(obj.pace7);}}, item:{radius:3,borderColor: "#00ccff"}, line:{color:"#00ccff",width:2} },
-    {  type:"line",  value:"#pace0#", tooltip:{css:"tpred", template:function(obj) {return To_Pace(obj.pace0);}}, item:{radius:3,borderColor: "#EC3774"}, line:{color:"#EC3774",width:2} }
+    {  type:"spline",  value:"#pace14#", tooltip:{css:"tpyellow",template:function(obj) {return To_Pace(obj.pace14);}}, item:{radius:3,borderColor: "#e9df40"}, line:{color:"#e9df40",width:2} },
+    {  type:"spline",  value:"#pace7#", tooltip:{css:"tpblue",template:function(obj) {return To_Pace(obj.pace7);}}, item:{radius:3,borderColor: "#00ccff"}, line:{color:"#00ccff",width:2} },
+    {  type:"spline",  value:"#pace0#", tooltip:{css:"tpred", template:function(obj) {return To_Pace(obj.pace0);}}, item:{radius:3,borderColor: "#EC3774"}, line:{color:"#EC3774",width:2} }
 
   ],		  
           data: gg
@@ -708,9 +855,9 @@ cols:[
       }
     }
   },  series:[
-    {  type:"line",  value:"#pace15#", tooltip:{css:"tpyellow",template:function(obj) {return To_Pace(obj.pace15);}}, item:{radius:3,borderColor: "#e9df40"}, line:{color:"#e9df40",width:2} },
-    {  type:"line",  value:"#pace8#", tooltip:{css:"tpblue",template:function(obj) {return To_Pace(obj.pace8);}}, item:{radius:3,borderColor: "#00ccff"}, line:{color:"#00ccff",width:2} },
-    {  type:"line",  value:"#pace1#", tooltip:{css:"tpred", template:function(obj) {return To_Pace(obj.pace1);}}, item:{radius:3,borderColor: "#EC3774"}, line:{color:"#EC3774",width:2} }
+    {  type:"spline",  value:"#pace15#", tooltip:{css:"tpyellow",template:function(obj) {return To_Pace(obj.pace15);}}, item:{radius:3,borderColor: "#e9df40"}, line:{color:"#e9df40",width:2} },
+    {  type:"spline",  value:"#pace8#", tooltip:{css:"tpblue",template:function(obj) {return To_Pace(obj.pace8);}}, item:{radius:3,borderColor: "#00ccff"}, line:{color:"#00ccff",width:2} },
+    {  type:"spline",  value:"#pace1#", tooltip:{css:"tpred", template:function(obj) {return To_Pace(obj.pace1);}}, item:{radius:3,borderColor: "#EC3774"}, line:{color:"#EC3774",width:2} }
   ],		  
           data: gg
         }
@@ -754,9 +901,9 @@ cols:[
       }
     }
   },  series:[
-    {  type:"line",  value:"#pace16#", tooltip:{css:"tpyellow",template:function(obj) {return To_Pace(obj.pace16);}}, item:{radius:3,borderColor: "#e9df40"}, line:{color:"#e9df40",width:2} },
-    {  type:"line",  value:"#pace9#", tooltip:{css:"tpblue",template:function(obj) {return To_Pace(obj.pace9);}}, item:{radius:3,borderColor: "#00ccff"}, line:{color:"#00ccff",width:2} },
-    {  type:"line",  value:"#pace2#", tooltip:{css:"tpred", template:function(obj) {return To_Pace(obj.pace2);}}, item:{radius:3,borderColor: "#EC3774"}, line:{color:"#EC3774",width:2} }
+    {  type:"spline",  value:"#pace16#", tooltip:{css:"tpyellow",template:function(obj) {return To_Pace(obj.pace16);}}, item:{radius:3,borderColor: "#e9df40"}, line:{color:"#e9df40",width:2} },
+    {  type:"spline",  value:"#pace9#", tooltip:{css:"tpblue",template:function(obj) {return To_Pace(obj.pace9);}}, item:{radius:3,borderColor: "#00ccff"}, line:{color:"#00ccff",width:2} },
+    {  type:"spline",  value:"#pace2#", tooltip:{css:"tpred", template:function(obj) {return To_Pace(obj.pace2);}}, item:{radius:3,borderColor: "#EC3774"}, line:{color:"#EC3774",width:2} }
   ],		  
           data: gg
         }
@@ -800,9 +947,9 @@ cols:[
       }
     }
   },  series:[
-    {  type:"line",  value:"#pace17#", tooltip:{css:"tpyellow",template:function(obj) {return To_Pace(obj.pace17);}}, item:{radius:3,borderColor: "#e9df40"}, line:{color:"#e9df40",width:2} },
-    {  type:"line",  value:"#pace10#", tooltip:{css:"tpblue",template:function(obj) {return To_Pace(obj.pace10);}}, item:{radius:3,borderColor: "#00ccff"}, line:{color:"#00ccff",width:2} },
-    {  type:"line",  value:"#pace3#", tooltip:{css:"tpred", template:function(obj) {return To_Pace(obj.pace3);}}, item:{radius:3,borderColor: "#EC3774"}, line:{color:"#EC3774",width:2} }
+    {  type:"spline",  value:"#pace17#", tooltip:{css:"tpyellow",template:function(obj) {return To_Pace(obj.pace17);}}, item:{radius:3,borderColor: "#e9df40"}, line:{color:"#e9df40",width:2} },
+    {  type:"spline",  value:"#pace10#", tooltip:{css:"tpblue",template:function(obj) {return To_Pace(obj.pace10);}}, item:{radius:3,borderColor: "#00ccff"}, line:{color:"#00ccff",width:2} },
+    {  type:"spline",  value:"#pace3#", tooltip:{css:"tpred", template:function(obj) {return To_Pace(obj.pace3);}}, item:{radius:3,borderColor: "#EC3774"}, line:{color:"#EC3774",width:2} }
   ],		  
           data: gg
         }
@@ -846,9 +993,9 @@ cols:[
       }
     }
   },  series:[
-    {  type:"line",  value:"#pace18#", tooltip:{css:"tpyellow",template:function(obj) {return To_Pace(obj.pace18);}}, item:{radius:3,borderColor: "#e9df40"}, line:{color:"#e9df40",width:2} },
-    {  type:"line",  value:"#pace11#", tooltip:{css:"tpblue",template:function(obj) {return To_Pace(obj.pace11);}}, item:{radius:3,borderColor: "#00ccff"}, line:{color:"#00ccff",width:2} },
-    {  type:"line",  value:"#pace4#", tooltip:{css:"tpred", template:function(obj) {return To_Pace(obj.pace4);}}, item:{radius:3,borderColor: "#EC3774"}, line:{color:"#EC3774",width:2} }
+    {  type:"spline",  value:"#pace18#", tooltip:{css:"tpyellow",template:function(obj) {return To_Pace(obj.pace18);}}, item:{radius:3,borderColor: "#e9df40"}, line:{color:"#e9df40",width:2} },
+    {  type:"spline",  value:"#pace11#", tooltip:{css:"tpblue",template:function(obj) {return To_Pace(obj.pace11);}}, item:{radius:3,borderColor: "#00ccff"}, line:{color:"#00ccff",width:2} },
+    {  type:"spline",  value:"#pace4#", tooltip:{css:"tpred", template:function(obj) {return To_Pace(obj.pace4);}}, item:{radius:3,borderColor: "#EC3774"}, line:{color:"#EC3774",width:2} }
   ],		  
           data: gg
         }
@@ -893,9 +1040,9 @@ cols:[
       }
     }
   },  series:[
-    {  type:"line",  value:"#pace19#", tooltip:{css:"tpyellow",template:function(obj) {return To_Pace(obj.pace19);}}, item:{radius:3,borderColor: "#e9df40"}, line:{color:"#e9df40",width:2} },
-    {  type:"line",  value:"#pace12#", tooltip:{css:"tpblue",template:function(obj) {return To_Pace(obj.pace12);}}, item:{radius:3,borderColor: "#00ccff"}, line:{color:"#00ccff",width:2} },
-    {  type:"line",  value:"#pace5#", tooltip:{css:"tpred", template:function(obj) {return To_Pace(obj.pace5);}}, item:{radius:3,borderColor: "#EC3774"}, line:{color:"#EC3774",width:2} }
+    {  type:"spline",  value:"#pace19#", tooltip:{css:"tpyellow",template:function(obj) {return To_Pace(obj.pace19);}}, item:{radius:3,borderColor: "#e9df40"}, line:{color:"#e9df40",width:2} },
+    {  type:"spline",  value:"#pace12#", tooltip:{css:"tpblue",template:function(obj) {return To_Pace(obj.pace12);}}, item:{radius:3,borderColor: "#00ccff"}, line:{color:"#00ccff",width:2} },
+    {  type:"spline",  value:"#pace5#", tooltip:{css:"tpred", template:function(obj) {return To_Pace(obj.pace5);}}, item:{radius:3,borderColor: "#EC3774"}, line:{color:"#EC3774",width:2} }
   ],		  
           data: gg
         }
@@ -939,9 +1086,9 @@ cols:[
       }
     }
   },  series:[
-    {  type:"line",  value:"#pace20#", tooltip:{css:"tpyellow",template:function(obj) {return To_Pace(obj.pace20);}}, item:{radius:3,borderColor: "#e9df40"}, line:{color:"#e9df40",width:2} },
-    {  type:"line",  value:"#pace13#", tooltip:{css:"tpblue",template:function(obj) {return To_Pace(obj.pace13);}}, item:{radius:3,borderColor: "#00ccff"}, line:{color:"#00ccff",width:2} },
-    {  type:"line",  value:"#pace6#", tooltip:{css:"tpred", template:function(obj) {return To_Pace(obj.pace6);}}, item:{radius:3,borderColor: "#EC3774"}, line:{color:"#EC3774",width:2} }
+    {  type:"spline",  value:"#pace20#", tooltip:{css:"tpyellow",template:function(obj) {return To_Pace(obj.pace20);}}, item:{radius:3,borderColor: "#e9df40"}, line:{color:"#e9df40",width:2} },
+    {  type:"spline",  value:"#pace13#", tooltip:{css:"tpblue",template:function(obj) {return To_Pace(obj.pace13);}}, item:{radius:3,borderColor: "#00ccff"}, line:{color:"#00ccff",width:2} },
+    {  type:"spline",  value:"#pace6#", tooltip:{css:"tpred", template:function(obj) {return To_Pace(obj.pace6);}}, item:{radius:3,borderColor: "#EC3774"}, line:{color:"#EC3774",width:2} }
   ],		  
           data: gg
         }
@@ -990,15 +1137,15 @@ webix.ui(
 
                 }
 
-                fr.readAsText(this.files[0]);
-            })
+//
+ });
 
 
 
 
 
 </script>
-<script>window.addEventListener('mousemove', function(event){document.querySelector('body > div.webix_message_area > div > div').click()},{ once: true});</script>
+
 </body>
 
 </html>
