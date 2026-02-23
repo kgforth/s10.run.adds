@@ -214,7 +214,7 @@ for(var i=0; i < d[0].studentTasksInfo.diaryTasks[r].tracks.length ; i++){
       try {
 			const tmp = [];
 			for(var i=0; i < d[0].studentTasksInfo.diaryTasks[r].tracks.length ; i++){
-			for(var j=0; j < d[0].studentTasksInfo.diaryTasks[r].tracks[i].json.laps.length ; j++){
+			for(var j=0; j < d[0].studentTasksInfo.diaryTasks[r].tracks[i].json.laps.length-1 ; j++){
 			tmp.push(d[0].studentTasksInfo.diaryTasks[r].tracks[i].json.laps[j].average_speed);
 				}
 			}	  
@@ -258,7 +258,7 @@ return t;
 			tmp = 0;
 			tt = 0;
 			for(var i=0; i < d[0].studentTasksInfo.diaryTasks[r].tracks.length ; i++){
-			for(var j=0; j < d[0].studentTasksInfo.diaryTasks[r].tracks[i].json.laps.length ; j++){
+			for(var j=0; j < d[0].studentTasksInfo.diaryTasks[r].tracks[i].json.laps.length-1 ; j++){
              tt = d[0].studentTasksInfo.diaryTasks[r].tracks[i].json.laps[j].hr ;
 
 if ( tt === undefined) {
@@ -298,7 +298,7 @@ if ( tt === undefined) {
 			tt = 0;
 			ttt = 0;
 			for(var i=0; i < d[0].studentTasksInfo.diaryTasks[r].tracks.length ; i++){
-			for(var j=0; j < d[0].studentTasksInfo.diaryTasks[r].tracks[i].json.laps.length ; j++){
+			for(var j=0; j < d[0].studentTasksInfo.diaryTasks[r].tracks[i].json.laps.length-1 ; j++){
              tt = d[0].studentTasksInfo.diaryTasks[r].tracks[i].json.laps[j].hr ;
 
 if ( tt === undefined) {
@@ -1148,5 +1148,6 @@ webix.ui(
 </body>
 
 </html>
+
 
 
